@@ -149,6 +149,7 @@ import com.spotify.docker.client.messages.ContainerMount;
 import com.spotify.docker.client.messages.ContainerStats;
 import com.spotify.docker.client.messages.ContainerUpdate;
 import com.spotify.docker.client.messages.Device;
+import com.spotify.docker.client.messages.DockerConfigRegistryAuthSupplier;
 import com.spotify.docker.client.messages.EndpointConfig;
 import com.spotify.docker.client.messages.EndpointConfig.EndpointIpamConfig;
 import com.spotify.docker.client.messages.Event;
@@ -173,6 +174,7 @@ import com.spotify.docker.client.messages.PortBinding;
 import com.spotify.docker.client.messages.ProcessConfig;
 import com.spotify.docker.client.messages.ProgressMessage;
 import com.spotify.docker.client.messages.RegistryAuth;
+import com.spotify.docker.client.messages.RegistryAuthSupplier;
 import com.spotify.docker.client.messages.RemovedImage;
 import com.spotify.docker.client.messages.ServiceCreateResponse;
 import com.spotify.docker.client.messages.TopResults;
@@ -664,6 +666,19 @@ public class DefaultDockerClientTest {
   public void testAuth() throws Exception {
     final int statusCode = sut.auth(registryAuth);
     assertThat(statusCode, equalTo(200));
+  }
+
+  @Test
+  public void testRegistryAuthSupplier() throws Exception {
+    final RegistryAuthSupplier authSupplier = new DockerConfigRegistryAuthSupplier();
+
+    final RegistryAuth registryAuth = authSupplier.authFor("foobar.com");
+    final int statusCode = sut.auth(registryAuth);
+    assertThat(statusCode, equalTo(200));
+
+    final RegistryAuth registryAuth2 = authSupplier.authFor("bazqux.com");
+    final int statusCode2 = sut.auth(registryAuth2);
+    assertThat(statusCode2, equalTo(200));
   }
 
   @Test
