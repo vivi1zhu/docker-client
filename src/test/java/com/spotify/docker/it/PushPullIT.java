@@ -257,7 +257,7 @@ public class PushPullIT {
   }
 
   @Test
-  public void testPullHubPrivateRepoWithBadAuth() throws Exception {
+  public void testPullHubPrivateImageWithBadAuth() throws Exception {
     final RegistryAuth badRegistryAuth = RegistryAuth.builder()
         .username(HUB_AUTH_USERNAME2)
         .password("foobar")
@@ -268,7 +268,7 @@ public class PushPullIT {
   }
 
   @Test
-  public void testBuildHubPrivateRepoWithAuth() throws Exception {
+  public void testBuildHubPrivateImageWithAuth() throws Exception {
     final String dockerDirectory = Resources.getResource("dockerDirectoryNeedsAuth").getPath();
     final RegistryAuth registryAuth = RegistryAuth.builder()
         .username(HUB_AUTH_USERNAME2)
@@ -283,7 +283,7 @@ public class PushPullIT {
   }
 
   @Test
-  public void testPullHubPrivateRepoWithAuth() throws Exception {
+  public void testPullHubPrivateImageWithAuth() throws Exception {
     final RegistryAuth registryAuth = RegistryAuth.builder()
         .username(HUB_AUTH_USERNAME2)
         .password(HUB_AUTH_PASSWORD2)
