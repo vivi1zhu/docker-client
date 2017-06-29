@@ -69,7 +69,7 @@ public class ConfigFileRegistryAuthSupplier implements RegistryAuthSupplier {
 
     final ImageRef ref = new ImageRef(imageName);
     try {
-      return reader.fromConfig(path, ref.getRegistryName());
+      return reader.fromConfig(path, ref.getRegistryUrl().toString());
     } catch (IllegalArgumentException e) {
       // no configuration for registry
       return null;

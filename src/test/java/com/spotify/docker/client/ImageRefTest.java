@@ -20,11 +20,13 @@
 
 package com.spotify.docker.client;
 
+import static com.spotify.docker.client.ImageRef.parseRegistryUrl;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
+import java.net.URL;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Test;
@@ -70,6 +72,7 @@ public class ImageRefTest {
     assertThat(new ImageRef("ubuntu"), hasRegistry(defaultRegistry));
     assertThat(new ImageRef("library/ubuntu"), hasRegistry(defaultRegistry));
     assertThat(new ImageRef("docker.io/library/ubuntu"), hasRegistry(defaultRegistry));
+    assertThat(new ImageRef("index.docker.io/library/ubuntu"), hasRegistry("index.docker.io"));
 
     assertThat(new ImageRef("registry.example.net/foo/bar"),
         hasRegistry("registry.example.net"));
@@ -84,6 +87,35 @@ public class ImageRefTest {
         hasRegistry("registry.example.net:5555"));
   }
 
+  @Test
+  public void testRegistryUrl() throws Exception {
+    final URL defaultRegistry = new URL("https://index.docker.io/v1");
+    assertThat(new ImageRef("ubuntu"), hasRegistryUrl(defaultRegistry));
+    assertThat(new ImageRef("library/ubuntu"), hasRegistryUrl(defaultRegistry));
+    assertThat(new ImageRef("docker.io/library/ubuntu"), hasRegistryUrl(defaultRegistry));
+    assertThat(new ImageRef("index.docker.io/library/ubuntu"), hasRegistryUrl(defaultRegistry));
+
+    assertThat(new ImageRef("registry.example.net/foo/bar"),
+        hasRegistryUrl(new URL("http://registry.example.net")));
+
+    assertThat(new ImageRef("registry.example.net/foo/bar:1.2.3"),
+        hasRegistryUrl(new URL("http://registry.example.net")));
+
+    assertThat(new ImageRef("registry.example.net/foo/bar:latest"),
+        hasRegistryUrl(new URL("http://registry.example.net")));
+
+    assertThat(new ImageRef("registry.example.net:5555/foo/bar:latest"),
+        hasRegistryUrl(new URL("http://registry.example.net:5555")));
+  }
+
+  @Test
+  public void testParseUrl() throws Exception {
+    assertThat(parseRegistryUrl("docker.io"), equalTo(new URL("https://index.docker.io/v1")));
+    assertThat(parseRegistryUrl("index.docker.io"), equalTo(new URL("https://index.docker.io/v1")));
+    assertThat(parseRegistryUrl("registry.net"), equalTo(new URL("http://registry.net")));
+    assertThat(parseRegistryUrl("registry.net:80"), equalTo(new URL("http://registry.net:80")));
+  }
+
   private static Matcher<ImageRef> hasRegistry(final String expected) {
     return new FeatureMatcher<ImageRef, String>(equalTo(expected), "registryName", "registryName") {
       @Override
@@ -93,4 +125,13 @@ public class ImageRefTest {
     };
   }
 
+  private static Matcher<ImageRef> hasRegistryUrl(final URL expected) {
+    return new FeatureMatcher<ImageRef, URL>(equalTo(expected),
+        "registryNameUrl", "registryNameUrl") {
+      @Override
+      protected URL featureValueOf(final ImageRef actual) {
+        return actual.getRegistryUrl();
+      }
+    };
+  }
 }

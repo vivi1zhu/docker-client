@@ -20,12 +20,17 @@
 
 package com.spotify.docker.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ImageRef {
 
   private static final String DEFAULT_REGISTRY = "docker.io";
+  private static final URL DEFAULT_REGISTRY_URL = parseRegistryUrl("https://index.docker.io/v1/");
 
+  private final URL registryUrl;
   private final String registry;
   private final String image;
   private final String tag;
@@ -52,8 +57,10 @@ public class ImageRef {
     final String[] parts = image.split("/", 2);
     if (parts.length > 1 && isRegistry(parts[0])) {
       this.registry = parts[0];
+      this.registryUrl = parseRegistryUrl(parts[0]);
     } else {
       this.registry = DEFAULT_REGISTRY;
+      this.registryUrl = DEFAULT_REGISTRY_URL;
     }
   }
 
@@ -75,6 +82,11 @@ public class ImageRef {
     return registry;
   }
 
+  /** Registry URL. */
+  public URL getRegistryUrl() {
+    return registryUrl;
+  }
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
@@ -83,4 +95,22 @@ public class ImageRef {
         .add("tag", tag)
         .toString();
   }
+
+  /** Parse a hostname string into URL. Return null if malformed. */
+  @VisibleForTesting
+  static URL parseRegistryUrl(final String url) {
+    try {
+      if (url.equals("docker.io") || url.equals("index.docker.io")) {
+        return new URL("https://index.docker.io/v1");
+      }
+      if (!url.contains("http://") && !url.contains("https://")) {
+        // Assume http
+        return new URL("http://" + url);
+      }
+      return new URL(url);
+    } catch (MalformedURLException e) {
+      return null;
+    }
+  }
+
 }
